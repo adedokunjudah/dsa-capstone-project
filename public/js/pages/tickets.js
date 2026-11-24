@@ -1,0 +1,6 @@
+import { listMyBookings, getEvent, cancelBooking } from '../api.js';
+import { requireLogin } from '../session.js';
+import { el, formatMoney, formatDate } from '../ui.js';
+const list=document.querySelector('#tickets');const status=document.querySelector('#status');
+if(requireLogin())load();
+async function load(){status.textContent='Loading your bookings…';list.replaceChildren();try{const {bookings}=await listMyBookings();if(!bookings.length){status.textContent='You have no bookings yet.';return;}status.textContent=`${bookings.length} booking(s)`;for(const booking of bookings){let event;try{event=await getEvent(booking.eventId);}catch{event={title:'Event details unavailable'};}const item=el('li',{class:'card'},[el('h2',{text:event.title}),el('p',{text:`Reference: ${booking.reference}`}),el('p',{text:`${booking.quantity} ticket(s) · ${formatMoney(booking.amountCents)}`}),el('p',{class:'badge',text:booking.status}),booking.createdAt?el('p',{class:'meta',text:formatDate(booking.createdAt)}):null]);if(booking.status==='pending'){const button=el('button',{text:'Cancel booking'});button.addEventListener('click',async()=>{button.disabled=true;try{await cancelBooking(booking.reference);await load();}catch(error){status.textContent=error.message;button.disabled=false;}});item.append(button);}list.append(item);}}catch(error){status.textContent=error.message;}}

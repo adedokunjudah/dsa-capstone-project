@@ -44,3 +44,9 @@ Every time you give an AI tool a significant prompt, add an entry. Three lines e
 - **Why a lock variable or a second check does not work:** A second check reads the same stale number, because every request can read before any of them writes; checking twice only makes the gap smaller, not gone. A lock variable lives in one Node process, so a second server process (or a script writing to the same database) never sees it, and a forgotten unlock after an error blocks every later booking.
 - **What was wrong (or "nothing"):** If saving the booking failed after the seat was taken, the seat stayed taken forever; added a `releaseSeats` in a `catch`. I checked that the test fails without the fix by putting the Build 4 lines back: all 4 oversell tests failed, then passed again with the fix. Known gap for Build 8: two cancel requests at the same moment could both pass the status check (refunds must release seats exactly once).
 
+## Build 7
+
+### Prompt 1: Login, roles and connected frontend
+- **What I asked:** Implement signup/login, scrypt password hashing, signed expiring HS256 tokens, bearer-token authorization, organizer/attendee role checks, private bookings, and real API-backed browser pages.
+- **What came back:** Added auth services and crypto helpers, bearer guards, SQLite user/password/hold migrations, attendee booking listing, real fetch API client, login/signup, attendee tickets and organizer dashboard pages, and authentication/authorization tests.
+- **What was wrong (or "nothing"):** The previous API used a caller-controlled `x-user-id` header and mock browser data; both had to be removed. Public signup intentionally excludes the staff role so visitors cannot grant themselves staff privileges. Staff check-in is not in the supplied Build 7 acceptance criteria.
